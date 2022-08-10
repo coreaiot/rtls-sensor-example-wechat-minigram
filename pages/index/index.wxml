@@ -1,0 +1,6 @@
+<!--index.wxml-->
+<view class="container">
+  <view class="usermotto">
+    <button bindtap="onClick" type="primary" disabled="{{busy}}">{{ started ? 'Stop' : 'Start' }}</button>
+  </view>
+</view>
