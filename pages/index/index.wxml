@@ -1,6 +1,30 @@
 <!--index.wxml-->
 <view class="container">
   <view class="usermotto">
-    <button bindtap="onClick" type="primary" disabled="{{busy}}">{{ started ? 'Stop' : 'Start' }}</button>
+    <view class="edit">
+      <view class="fc">
+        <label>MAC:</label>
+        <input type="text" maxlength="4" value="{{mac}}" bindinput="macChange" />
+      </view>
+      <view class="fc">
+        <label>Alarm:</label>
+        <switch checked="{{alarm}}" bindchange="alarmChange" />
+      </view>
+      <view class="fc">
+        <label>Battery:</label>
+        <input type="number" maxlength="3" value="{{battery}}" bindinput="batteryChange" />
+      </view>
+      <view class="fc">
+        <label>Delta:</label>
+        <input type="number" value="{{delta}}" bindinput="deltaChange" />
+      </view>
+      <view class="fc">
+        <label>Moving:</label>
+        {{ moving }}
+      </view>
+    </view>
+    <view class="content">{{content}}</view>
+    <button wx:if="{{started}}" style="margin-bottom: 12px;" bindtap="update" type="default" disabled="{{busy}}">Update</button>
+    <button bindtap="onClick" type="{{ started ? 'warn' : 'primary' }}" disabled="{{busy}}">{{ started ? 'Stop' : 'Start' }}</button>
   </view>
 </view>
