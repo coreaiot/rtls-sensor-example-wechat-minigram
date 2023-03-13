@@ -1,3 +1,30 @@
 .usermotto {
-  margin-top: 200px;
+}
+
+.edit {
+  margin-bottom: 32px;
+  padding: 40px 50px 16px;
+  background: #eee;
+  width: calc(100vw - 100px);
+}
+
+.fc {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.fc label {
+  margin-right: 12px;
+}
+
+.fc input {
+  border: 1px solid #aaa;
+  padding: 4px 12px;
+  border-radius: 5px;
+  width: 40px;
+}
+
+.content {
+  padding: 32px;
 }
