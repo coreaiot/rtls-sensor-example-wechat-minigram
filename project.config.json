@@ -35,7 +35,9 @@
     "showES6CompileOption": false,
     "useCompilerPlugins": false,
     "ignoreUploadUnusedFiles": true,
-    "useStaticServer": true
+    "useStaticServer": true,
+    "condition": false,
+    "skylineRenderEnable": false
   },
   "compileType": "miniprogram",
   "condition": {},
@@ -53,5 +55,5 @@
     ],
     "include": []
   },
-  "appid": "wx0014f83c2903a904"
+  "appid": "wxcaffa9fbee0c1bca"
 }
