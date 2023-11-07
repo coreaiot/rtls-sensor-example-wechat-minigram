@@ -17,7 +17,11 @@ Page({
     delta: 0.1,
     alarm: true,
     moving: false,
-    content: ''
+    content: '',
+    powerLevels: ['low', 'medium', 'high'],
+    powerLevelIdx: 0,
+    broadcastItv: 500,
+    broadcastSleepItv: 500
   },
   macChange(e) {
     this.data.mac = e.detail.value
@@ -48,7 +52,7 @@ Page({
         parseInt(this.data.mac, 16),
         ~~this.data.alarm,
         Math.floor(this.data.battery / 10),
-        ~~this.data.moving,
+        ~~!this.data.moving,
       )
       const buffer = this.data.wasi.instance.exports.memory.buffer.slice(
         ptr,
@@ -58,6 +62,7 @@ Page({
       const serviceUuids = Array.from(new Uint16Array(buffer)).map(x => x.toString(16).padStart(4, '0'))
       this.advertiseRequest = {
         serviceUuids,
+        connectable: false
       }
       const content = serviceUuids.join(' ')
       this.setData({
@@ -74,7 +79,7 @@ Page({
         advertise_mode,
         tx_power_level,
         channel,
-        ~~this.data.moving,
+        ~~!this.data.moving,
       )
       let buffer = this.data.wasi.instance.exports.memory.buffer.slice(
         ptr,
@@ -100,7 +105,7 @@ Page({
     if (this.ble) return
     try {
       const res = await wx.createBLEPeripheralServer()
-      this.ble = res.server;
+      this.ble = res.server
     } catch (e) {
       console.error(e);
     }
@@ -108,36 +113,56 @@ Page({
   async start() {
     await this.initBleServer()
     this.makeAdvertiseRequest()
-    this.ble.startAdvertising({
-      advertiseRequest: this.advertiseRequest,
-      success: () => {
-        this.setData({
-          busy: false,
-          started: true
+    this.stopped = false
+    while (!this.stopped) {
+      const startTs = new Date().getTime()
+      const started = await new Promise(r => {
+        this.ble.startAdvertising({
+          powerLevel: this.data.powerLevels[this.data.powerLevelIdx],
+          advertiseRequest: this.advertiseRequest,
+          success: () => {
+            this.setData({
+              busy: false,
+              started: true
+            })
+            console.log('BLE started')
+            r(true)
+          },
+          fail: e => {
+            console.error(e)
+            r(false)
+          }
         })
-        console.log('BLE started');
-      },
-      fail: e => {
-        console.error(e)
+      })
+      const startedTs = new Date().getTime()
+      let elapsed = startedTs - startTs
+      await new Promise(r => setTimeout(r, this.data.broadcastItv - elapsed))
+      if (!started) continue
+      let stopped = false
+      while (!stopped) {
+        stopped = await new Promise(r => {
+          this.ble.stopAdvertising({
+            success: () => {
+              console.log('BLE stopped')
+              r(true)
+            },
+            fail: e => {
+              console.error(e)
+              r(false)
+            }
+          })
+        })
       }
+      elapsed = new Date().getTime() - startedTs
+      await new Promise(r => setTimeout(r, this.data.broadcastSleepItv - elapsed))
+    }
+    this.setData({
+      busy: false,
+      started: false
     })
   },
-  stop() {
-    return new Promise((r, rr) => {
-      this.ble.stopAdvertising({
-        success: () => {
-          this.setData({
-            busy: false,
-            started: false
-          })
-          r()
-        },
-        fail: e => {
-          console.error(e)
-          rr(e)
-        }
-      })
-    })
+  async stop() {
+    this.stopped = true
   },
   async update() {
     if (!this.data.started) return
@@ -186,5 +211,23 @@ Page({
   async onUnload() {
     await wx.closeBluetoothAdapter({})
     console.log('BLE Adapter closed')
-  }
+  },
+
+  bindPickerChange(e) {
+    this.setData({
+      powerLevelIdx: e.detail.value
+    })
+  },
+
+  broadcastItvChange(e) {
+    this.data.broadcastItv = Number(e.detail.value)
+  },
+
+  broadcastSleepItvChange(e) {
+    this.data.broadcastSleepItv = Number(e.detail.value)
+  },
+
+  numberOfBroadcastersChange(e) {
+    this.data.numberOfBroadcasters = Number(e.detail.value)
+  },
 })

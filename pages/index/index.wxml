@@ -22,6 +22,21 @@
         <label>Moving:</label>
         {{ moving }}
       </view>
+      <view class="fc">
+        <picker bindchange="bindPickerChange" value="{{powerLevelIdx}}" range="{{powerLevels}}">
+          <view class="picker">
+            Power Level: {{powerLevels[powerLevelIdx]}}
+          </view>
+        </picker>
+      </view>
+      <view class="fc">
+        <label>Broadcast Itv:</label>
+        <input type="number" value="{{broadcastItv}}" bindinput="broadcastItvChange" />
+      </view>
+      <view class="fc">
+        <label>Broadcast Sleep Itv:</label>
+        <input type="number" value="{{broadcastSleepItv}}" bindinput="broadcastSleepItvChange" />
+      </view>
     </view>
     <view class="content">{{content}}</view>
     <button wx:if="{{started}}" style="margin-bottom: 12px;" bindtap="update" type="default" disabled="{{busy}}">Update</button>
