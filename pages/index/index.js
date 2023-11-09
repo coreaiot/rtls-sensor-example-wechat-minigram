@@ -13,6 +13,8 @@ Page({
     ready: false,
     systemInfo: null,
     mac: '1234',
+    channels: ['37 (2402)', '38 (2426)', '39 (2480)'],
+    channelIdx: 0,
     battery: 50,
     delta: 0.1,
     alarm: true,
@@ -48,10 +50,12 @@ Page({
   },
   makeAdvertiseRequest() {
     if (this.data.systemInfo.platform === 'ios') {
+      console.log('this.data.channelIdx', this.data.channelIdx)
       const ptr = this.data.wasi.instance.exports.coreaiot_generate_service_uuids(
         parseInt(this.data.mac, 16),
         ~~this.data.alarm,
         Math.floor(this.data.battery / 10),
+        this.data.channelIdx,
         ~~!this.data.moving,
       )
       const buffer = this.data.wasi.instance.exports.memory.buffer.slice(
@@ -70,15 +74,13 @@ Page({
       })
     } else {
       const advertise_mode = 0
-      const tx_power_level = 0
-      const channel = 0
       const ptr = this.data.wasi.instance.exports.coreaiot_generate_manufacturer_specific_data(
         parseInt(this.data.mac, 16),
         ~~this.data.alarm,
         Math.floor(this.data.battery / 10),
         advertise_mode,
-        tx_power_level,
-        channel,
+        this.data.powerLevelIdx,
+        this.data.channelIdx,
         ~~!this.data.moving,
       )
       let buffer = this.data.wasi.instance.exports.memory.buffer.slice(
@@ -171,7 +173,7 @@ Page({
   },
   async onLoad() {
     try {
-      this.data.wasi = await WXWebAssembly.instantiate("sensor.wasm")
+      this.data.wasi = await WXWebAssembly.instantiate("wasi/sensor.wasm")
       this.data.systemInfo = wx.getSystemInfoSync()
       console.log(this.data.systemInfo)
       await wx.openBluetoothAdapter({
@@ -213,7 +215,13 @@ Page({
     console.log('BLE Adapter closed')
   },
 
-  bindPickerChange(e) {
+  bindChannelChange(e) {
+    this.setData({
+      channelIdx: e.detail.value
+    })
+  },
+
+  bindPowerLevelChange(e) {
     this.setData({
       powerLevelIdx: e.detail.value
     })

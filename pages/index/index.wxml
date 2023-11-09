@@ -7,6 +7,13 @@
         <input type="text" maxlength="4" value="{{mac}}" bindinput="macChange" />
       </view>
       <view class="fc">
+        <picker bindchange="bindChannelChange" value="{{channelIdx}}" range="{{channels}}">
+          <view class="picker">
+            Channel: {{channels[channelIdx]}}
+          </view>
+        </picker>
+      </view>
+      <view class="fc">
         <label>Alarm:</label>
         <switch checked="{{alarm}}" bindchange="alarmChange" />
       </view>
@@ -23,7 +30,7 @@
         {{ moving }}
       </view>
       <view class="fc">
-        <picker bindchange="bindPickerChange" value="{{powerLevelIdx}}" range="{{powerLevels}}">
+        <picker bindchange="bindPowerLevelChange" value="{{powerLevelIdx}}" range="{{powerLevels}}">
           <view class="picker">
             Power Level: {{powerLevels[powerLevelIdx]}}
           </view>
